@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mega Guía: Apuntes de Bases de Datos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; font-family: 'Roboto', sans-serif; background-color: #f4f6f9; color: #333; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* HEADER */
+        .header { background: #1a237e; color: white; padding: 15px 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 10; flex-shrink: 0; }
+        .header h1 { margin: 0; font-size: 1.6rem; text-transform: uppercase; }
+        .header p { margin: 5px 0 0 0; color: #c5cae9; font-size: 0.95rem; }
+        
+        /* LAYOUT PRINCIPAL */
+        .container { display: flex; flex: 1; overflow: hidden; }
+        
+        /* BARRA LATERAL (SCROLLABLE) */
+        .sidebar { width: 280px; background: white; border-right: 1px solid #e0e0e0; padding: 20px; overflow-y: auto; flex-shrink: 0; }
+        .sidebar h3 { margin-top: 20px; margin-bottom: 10px; color: #1a237e; border-bottom: 2px solid #e8eaf6; padding-bottom: 5px; font-size: 1.1rem; }
+        .sidebar h3:first-child { margin-top: 0; }
+        .nav-btn { display: block; width: 100%; text-align: left; background: none; border: none; padding: 10px 12px; font-size: 0.95rem; cursor: pointer; border-radius: 4px; color: #555; transition: 0.2s; margin-bottom: 4px; }
+        .nav-btn:hover { background: #e8eaf6; color: #1a237e; }
+        .nav-btn.active { background: #e8eaf6; color: #1a237e; font-weight: bold; border-left: 4px solid #ff4081; padding-left: 8px; }
+
+        /* ÁREA DE CONTENIDO (SCROLLABLE) */
+        .content-area { flex: 1; padding: 30px 40px; overflow-y: auto; background-color: #f4f6f9; }
+        .section { display: none; background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); animation: fadeIn 0.3s; margin-bottom: 30px; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h2 { color: #1a237e; border-bottom: 3px solid #ff4081; padding-bottom: 10px; margin-top: 0; }
+        
+        /* TARJETAS DE APUNTES */
+        .note-card { background: #fffde7; border-left: 5px solid #fbc02d; padding: 18px 20px; margin-bottom: 20px; border-radius: 0 8px 8px 0; }
+        .note-card.unit2 { background: #f1f8e9; border-left-color: #8bc34a; }
+        .note-card.unit2 h4 { color: #33691e; }
+        .note-card.unit3 { background: #e3f2fd; border-left-color: #2196f3; }
+        .note-card.unit3 h4 { color: #0d47a1; }
+        
+        .note-card h4 { margin: 0 0 10px 0; color: #f57f17; font-size: 1.15rem; }
+        .note-card p, .note-card ul, .note-card ol { margin: 0; line-height: 1.6; color: #222; }
+        .note-card ul, .note-card ol { padding-left: 20px; margin-top: 10px; }
+        .note-card li { margin-bottom: 6px; }
+        
+        /* DIAGRAMAS Y DIBUJOS CSS */
+        .diagram-box { border: 2px dashed #9fa8da; padding: 20px; text-align: center; background: #f8f9fe; border-radius: 8px; margin: 20px 0; }
+        .drawing-box { display: flex; align-items: center; background: white; border: 1px solid #ccc; margin: 15px 0; padding: 12px 15px; border-radius: 5px; }
+        .shape-desc { flex: 1; margin-left: 20px; font-size: 0.95rem; }
+        .shape { display: inline-flex; justify-content: center; align-items: center; font-weight: bold; font-size: 0.85rem; text-align: center; color: #111; }
+        
+        /* Formas dibujadas */
+        .s-rect { border: 2px solid #333; padding: 6px 18px; }
+        .s-rect-double { border: 1px solid #333; padding: 4px; position: relative; }
+        .s-rect-double::after { content: ''; position: absolute; top: 2px; left: 2px; right: 2px; bottom: 2px; border: 1px solid #333; }
+        .s-oval { border: 2px solid #333; border-radius: 50%; padding: 6px 18px; }
+        .s-oval-double { border: 1px solid #333; border-radius: 50%; padding: 4px; position: relative; }
+        .s-oval-double::after { content: ''; position: absolute; top: 2px; left: 2px; right: 2px; bottom: 2px; border: 1px solid #333; border-radius: 50%; }
+        .s-oval-dash { border: 2px dashed #333; border-radius: 50%; padding: 6px 18px; }
+        .s-diamond { width: 45px; height: 45px; border: 2px solid #333; transform: rotate(45deg); display: inline-block; }
+        .s-diamond-double { width: 45px; height: 45px; border: 1px solid #333; transform: rotate(45deg); position: relative; display: inline-block; }
+        .s-diamond-double::after { content: ''; position: absolute; top: 3px; left: 3px; right: 3px; bottom: 3px; border: 1px solid #333; }
+
+        .highlight { background: #ffe082; padding: 2px 5px; border-radius: 3px; font-weight: 500; }
+
+        /* ================= ESTILOS PARA APOYO VISUAL ================= */
+        .visual-container { background: white; padding: 25px; border-radius: 8px; border: 1px solid #cfd8dc; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        /* 1. Arquitectura 3 Niveles */
+        .level-box { padding: 12px 20px; border-radius: 6px; font-weight: bold; text-align: center; width: 60%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin: 5px 0; z-index: 2; position: relative; }
+        .lvl-ext { background: #e3f2fd; border: 2px solid #2196f3; color: #0d47a1; display: flex; justify-content: space-around; }
+        .lvl-con { background: #e8f5e9; border: 2px solid #4caf50; color: #1b5e20; }
+        .lvl-int { background: #fff3e0; border: 2px solid #ff9800; color: #e65100; }
+        .arrow-down { width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 12px solid #78909c; margin: 5px 0; }
+        .db-cylinders { display: flex; gap: 20px; justify-content: center; margin-top: 10px; }
+        .cylinder { width: 50px; height: 60px; background: #90a4ae; border-radius: 50% / 12px; position: relative; border: 2px solid #455a64; box-shadow: inset -10px 0 10px rgba(0,0,0,0.2); }
+        .cylinder::before { content: ''; position: absolute; top: -2px; left: -2px; width: 100%; height: 12px; background: #cfd8dc; border-radius: 50%; border: 2px solid #455a64; }
+
+        /* 2. Arquitectura SGBD */
+        .sgbd-arch { display: flex; flex-direction: column; width: 100%; max-width: 600px; gap: 15px; }
+        .sgbd-row { display: flex; justify-content: space-around; text-align: center; gap: 10px; }
+        .sgbd-box { background: #f3e5f5; border: 2px solid #9c27b0; color: #4a148c; padding: 10px; border-radius: 6px; flex: 1; font-size: 0.9rem; font-weight: 500; }
+        .sgbd-core { border: 2px dashed #9c27b0; padding: 15px; background: #fafafa; border-radius: 8px; }
+
+        /* 3. Diagrama E-R Ejemplo */
+        .er-example { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; padding: 20px; }
+        .er-line { width: 30px; height: 3px; background: #333; }
+        .er-line.vertical { width: 3px; height: 30px; margin: 0 auto;}
+        .col-flex { display: flex; flex-direction: column; align-items: center; }
+
+        /* ================= ESTILOS PARA PREGUNTAS DE PRÁCTICA ================= */
+        details { background: #fff3e0; border-left: 5px solid #ff9800; padding: 15px 20px; margin-bottom: 20px; border-radius: 0 8px 8px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        summary { font-weight: bold; color: #e65100; cursor: pointer; outline: none; font-size: 1.1rem; list-style: none; display: flex; align-items: center; }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: '►'; color: #ff9800; margin-right: 10px; font-size: 0.9rem; transition: 0.2s; }
+        details[open] summary::before { transform: rotate(90deg); }
+        .details-content { margin-top: 15px; border-top: 1px dashed #ffb74d; padding-top: 15px; color: #333; line-height: 1.6; }
+        .quiz-question { font-size: 1.05rem; margin-bottom: 10px; }
+
+        /* ================= DISEÑO RESPONSIVO (MÓVILES Y TABLETS) ================= */
+        @media screen and (max-width: 850px) {
+            /* Cambiar diseño de horizontal a vertical */
+            body { height: auto; overflow: auto; }
+            .container { flex-direction: column; overflow: visible; }
+            
+            /* Ajustar barra lateral para que sea un menú superior deslizable */
+            .sidebar { width: 100%; border-right: none; border-bottom: 2px solid #e0e0e0; padding: 15px; max-height: 250px; overflow-y: auto; box-sizing: border-box; }
+            .sidebar h3 { font-size: 1rem; margin-top: 15px; }
+            .nav-btn { padding: 10px; font-size: 0.9rem; border-left: none; border-bottom: 3px solid transparent; }
+            .nav-btn.active { border-left: none; border-bottom: 3px solid #ff4081; padding-left: 12px; }
+
+            /* Reducir márgenes del contenido para aprovechar pantalla */
+            .content-area { padding: 15px; overflow: visible; }
+            .section { padding: 20px 15px; }
+            
+            /* Ajustar Diagramas Visuales al tamaño del celular */
+            .level-box { width: 95%; font-size: 0.85rem; }
+            .lvl-ext { flex-direction: column; gap: 5px; }
+            .sgbd-row { flex-direction: column; gap: 10px; }
+            .sgbd-box { width: 100%; box-sizing: border-box; }
+            .drawing-box { flex-direction: column; text-align: center; gap: 10px; }
+            .shape-desc { margin-left: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>AYUDA GOKU TENEMOS QUE APROBAR</h1>
+        <p>Unidad 1 (Fundamentos), Unidad 2 (Modelo E-R) y Unidad 3 (Relacional)</p>
+    </div>
+
+    <div class="container">
+        
+        <!-- BARRA LATERAL -->
+        <div class="sidebar">
+            <h3>UNIDAD 1</h3>
+            <button class="nav-btn active" onclick="openSec('u1-1')">1.1 Aspectos y Conceptos</button>
+            <button class="nav-btn" onclick="openSec('u1-2')">1.1.3 Usuarios y Ciclo de Vida</button>
+            <button class="nav-btn" onclick="openSec('u1-3')">1.2 SGBD, Módulos y SQL</button>
+            <button class="nav-btn" onclick="openSec('u1-4')">1.3 Arquitectura 3 Niveles</button>
+            <button class="nav-btn" onclick="openSec('u1-5')">1.4 Modelos de Datos</button>
+            
+            <h3>UNIDAD 2</h3>
+            <button class="nav-btn" onclick="openSec('u2-1')">2.1 Entidades y Conceptos</button>
+            <button class="nav-btn" onclick="openSec('u2-2')">2.2 Atributos y Trazados</button>
+            <button class="nav-btn" onclick="openSec('u2-3')">2.3 Relaciones y Vínculos</button>
+
+            <h3>UNIDAD 3</h3>
+            <button class="nav-btn" onclick="openSec('u3-1')">3. Lógica y Normalización</button>
+            <h3>RECURSOS</h3>
+            <button class="nav-btn" onclick="openSec('apoyo-visual')">Apoyo Visual y Diagramas</button>
+            <button class="nav-btn" style="color: #d32f2f; font-weight: bold;" onclick="openSec('practica')">¡PRÁCTICA Y EJERCICIOS!</button>
+        </div>
+
+        <!-- ÁREA DE CONTENIDO -->
+        <div class="content-area">
+            
+            <!-- ======================= UNIDAD 1 ======================= -->
+            
+            <div id="u1-1" class="section active">
+                <h2>1.1 Aspectos Básicos de las Bases de Datos</h2>
+                
+                <div class="note-card">
+                    <h4>¿Qué es un Dato?</h4>
+                    <p>Representación de hechos, conceptos o instrucciones organizados de forma que se puedan procesar, interpretar o comunicar por medios humanos o automáticos. Representación de caracteres o cantidades analógicas con un significado.<br>
+                    <b>Tipos:</b> Cuantitativos (Cantidades, medir) y Cualitativos (Cualidades, no medibles/contabilizables).</p>
+                </div>
+
+                <div class="note-card">
+                    <h4>¿Qué es Información?</h4>
+                    <p>Conjunto de datos con un significado, que reduce o aumenta de algo. Comprende los datos y brinda conocimientos que se utiliza en la <b>toma de decisiones</b>. Son datos procesados para ser entendidos.</p>
+                </div>
+
+                <div class="note-card">
+                    <h4>Sistemas y Sistemas de Información</h4>
+                    <ul>
+                        <li><b>¿Qué es un Sistema?</b> Conjunto de elementos relacionados entre sí para satisfacer un propósito específico. (Objetivos, Elementos, Asociación, Alcance, Restricciones).</li>
+                        <li><b>Sistema de Información:</b> Conjunto de elementos interrelacionados con objetivo de administración y control de datos. (Elementos: Datos, SW, HW, RRHH).</li>
+                        <li><b>Actividades:</b> Entidades externas (cuadrado), Proceso (círculo), Almacén de datos (cilindro), Flujos (flechas).</li>
+                        <li><b>Tipos:</b> Transaccionales, Ejecutivos, Estratégicos, Apoyo a la toma de decisiones.</li>
+                    </ul>
+                </div>
+
+                <div class="note-card">
+                    <h4>Base de Datos (BD) y Propiedades</h4>
+                    <p>Colección de datos organizados y relacionados entre sí. Propiedades implícitas:</p>
+                    <ol>
+                        <li>Representa algún aspecto del mundo real.</li>
+                        <li>Conjunto de datos lógicamente coherente con significado inherente.</li>
+                        <li>Diseñada, construida, poblada con datos para un objetivo específico.</li>
+                    </ol>
+                </div>
+
+                <div class="note-card">
+                    <h4>Características del Enfoque de Base de Datos</h4>
+                    <ul>
+                        <li>Someter a procesamiento datos conocidos y obtener nuevos.</li>
+                        <li>Naturaleza auto descriptiva. (Catálogo del sistema = Definición de estructura).</li>
+                        <li><b>Separación entre los programas y los datos</b> (Independencia).</li>
+                        <li>Multiusuario (Concurrencia) y Múltiples vistas. Procesamiento de transacciones.</li>
+                        <li><b>Ventajas:</b> Datos organizados, <span class="highlight">Redundancia Controlada</span>, Consistencia, Seguridad.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="u1-2" class="section">
+                <h2>1.1.3 Usuarios y 1.1.4 Ciclo de Vida</h2>
+
+                <div class="note-card">
+                    <h4>Usuarios de la Base de Datos</h4>
+                    <ul>
+                        <li><b>DBA (Administrador de BD):</b> Supervisa y controla recursos. (Diseño, Seguridad, Copias, Mantenimiento).</li>
+                        <li><b>Diseñador de la BD:</b> Identifica datos a almacenar. Define la estructura apropiada (Modelos).</li>
+                        <li><b>Analistas y programadores:</b> Diseñan e implementan las aplicaciones para acceder a la BD.</li>
+                        <li><b>Usuarios Finales:</b> Esporádicos, Paramétricos/Simples (Operaciones enlatadas), Avanzados, Autónomos (no saben de la BD).</li>
+                    </ul>
+                </div>
+
+                <div class="note-card">
+                    <h4>Fases de desarrollo de las BD (Ciclo de Vida)</h4>
+                    <p>Mini Mundo // Realidad, necesidad o problemática -> Requerimientos de BD.</p>
+                    <ol>
+                        <li><b>Recolección y análisis de requerimientos</b></li>
+                        <li><b>Diseño Conceptual:</b> => Esquema Conceptual (Independencia del SGBD).</li>
+                        <li><b>Diseño Lógico:</b> Esquema lógico / Refinación. (Dependencia del SGBD).</li>
+                        <li><b>Diseño Físico:</b> Esquema interno // SQL.</li>
+                    </ol>
+                    <p><i>Nota: Herramientas CASE. Necesidad de Análisis (¿Qué?), Diseño (¿Cómo?). Ejemplos: Genexus, IBM Workbench, ERWIN.</i></p>
+                </div>
+            </div>
+
+            <div id="u1-3" class="section">
+                <h2>1.2 SGBD, Módulos Componentes y Lenguajes</h2>
+
+                <div class="note-card">
+                    <h4>Sistema Gestor de Datos (SGBD)</h4>
+                    <p>Sistema de software de propósito general. Conjunto de programas para crear y mantener una BD.<br>
+                    <b>Características:</b> Control de redundancia, concurrencia, restricción de accesos, almacenamiento persistente, diferentes interfaces, integridad, respaldo/recuperación.<br>
+                    <b>Desventajas:</b> Costos, infraestructura robusta, capacitación, mayor complejidad (muchos vínculos), búsquedas más lentas.</p>
+                </div>
+
+                <div class="diagram-box">
+                    <h3>Arquitectura Interna (Motor SGBD)</h3>
+                    <p>Usuarios -> Formularios / Apps Front-end / Interfaz SQL -> Comandos SQL</p>
+                    <p><b>Procesamiento:</b> Ejecutor del plan, Evaluador Operadores, Parser, <b>Optimizador</b>.</p>
+                    <p><b>Físico:</b> Admin de transacciones, Archivos/métodos de acceso, Admin de páginas, Admin de espacio en disco, Admin de recuperación, Bitácora.</p>
+                    <p><b>Almacenamiento:</b> Catálogo del sistema -> Archivo de datos / Archivo de índices.</p>
+                </div>
+
+                <div class="note-card">
+                    <h4>Compilador y Optimizador</h4>
+                    <ul>
+                        <li><b>Compilador:</b> Analiza SQL (Léxico, sintácticas, semánticas). Transforma SQL -> Árbol inicial => Árbol canónico.</li>
+                        <li><b>Optimizador de consultas:</b> Analiza y transforma una consulta en una secuencia eficiente. Utiliza Heurísticas/Reglas algebraicas y evalúa Costos (Metadatos, CPU, Disco).</li>
+                    </ul>
+                </div>
+
+                <div class="note-card">
+                    <h4>Lenguaje SQL</h4>
+                    <p>Lenguaje declarativo de alto nivel.</p>
+                    <ul>
+                        <li><b>DDL:</b> Lenguaje de Definición de datos (Create table...).</li>
+                        <li><b>DML:</b> Lenguaje de Manipulación de datos (Insert, Select...).</li>
+                        <li><b>CTL / TCL:</b> Control de transacciones (Commit).</li>
+                        <li><b>DCL:</b> Control de acceso a datos. (VDL: Vistas, SDL: Almacenamiento).</li>
+                    </ul>
+                </div>
+
+                <div class="note-card">
+                    <h4>Metadatos y Transacción</h4>
+                    <p><b>Transacción:</b> Modificar el valor de un dato.<br>
+                    <b>Metadatos:</b> Descripción de un dato. Contiene la <b>Granularidad</b> (tipo, longitud, restricciones). El Catálogo del sistema es el conjunto de Metadatos.</p>
+                </div>
+            </div>
+
+            <div id="u1-4" class="section">
+                <h2>1.3 Arquitectura de 3 Niveles y Sistemas de BD</h2>
+
+                <div class="note-card">
+                    <h4>Sistema de Base de Datos (SBD)</h4>
+                    <p>Conjunto de recursos para manipular la BD. <br>
+                    Estructura: <b>Usuarios <--> Programas de Aplicación <--> SGBD <--> BD almacenada</b>.</p>
+                </div>
+
+                <div class="note-card">
+                    <h4>Arquitectura de Tres Niveles (ANSI-SPARC, 1975)</h4>
+                    <p><b>Objetivo:</b> Formar una separación entre las aplicaciones del usuario y la base de datos.</p>
+                    <ul>
+                        <li><b>Nivel externo:</b> Vista externa (Programas de usuario).</li>
+                        <li><b>Nivel conceptual:</b> Esquema Conceptual. Estructura lógica completa (DBA/Diseñador).</li>
+                        <li><b>Nivel interno:</b> Esquema Interno. Estructura física (DBA).</li>
+                    </ul>
+                </div>
+
+                <div class="note-card">
+                    <h4>Independencia de Datos y Cliente-Servidor</h4>
+                    <p>Cada usuario tiene una vista propia. Existe <b>Independencia Física</b> y <b>Independencia Lógica</b>.<br>
+                    <b>Arquitectura Cliente-Servidor:</b> 2 capas, 3 capas, n-capas. Permite fragmentar los datos: Horizontal, Vertical (¡Causa redundancia!), Híbrida.</p>
+                </div>
+            </div>
+
+            <div id="u1-5" class="section">
+                <h2>1.4 Modelos de Datos</h2>
+
+                <div class="note-card">
+                    <h4>¿Qué es un Modelo?</h4>
+                    <p>Resultado de un proceso de abstracción y ayuda a comprender y razonar sobre una realidad. Estructura lógica = Datos + Relaciones. Incluye Operaciones (CRUD) y Restricciones de validación.</p>
+                </div>
+
+                <div class="note-card">
+                    <h4>Clasificación de Modelos</h4>
+                    <ul>
+                        <li><b>Alto nivel / Conceptual:</b> Muy cercanos al modo en el que el usuario percibe los datos.</li>
+                        <li><b>Implementación / Representación:</b> Entendibles por usuarios. Descubren la estructura lógica, ocultan detalles de implementación. (Red, Relacional, POO, Jerárquico).</li>
+                        <li><b>Bajo Nivel / Físico:</b> Detalles de almacenamiento. Para especialistas (DBA).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ======================= UNIDAD 2 ======================= -->
+
+            <div id="u2-1" class="section">
+                <h2>2.1 Aspectos Teóricos del Modelo Entidad-Relación</h2>
+                
+                <div class="note-card unit2">
+                    <h4>Origen del Modelo E-R</h4>
+                    <p>Modelo de datos de alto nivel conceptual. Propuesto por <b>Peter Chen (1976)</b>.<br>
+                    Adopta el enfoque más natural del mundo real que consiste en entidades y relaciones.</p>
+                </div>
+
+                <div class="note-card unit2">
+                    <h4>Entidad e Instancias</h4>
+                    <ul>
+                        <li><b>Entidad:</b> Cualquier objeto que existe en la realidad (Real o Abstracto) y acerca del cual queremos almacenar datos.</li>
+                        <li><b>Tipo de Entidad (<span class="highlight">Intensión</span>):</b> Estructura genérica que describe un conjunto de entidades.</li>
+                        <li><b>Ejemplar/Entidad (<span class="highlight">Extensión</span>):</b> Ejemplares de un tipo de entidad.</li>
+                    </ul>
+                </div>
+
+                <div class="note-card unit2">
+                    <h4>Reglas de un tipo de Entidad</h4>
+                    <ol>
+                        <li>Tiene que tener existencia propia.</li>
+                        <li>Cada ejemplar debe poder distinguirse de los demás.</li>
+                        <li>Todos los ejemplares deben tener las mismas propiedades.</li>
+                    </ol>
+                </div>
+
+                <div class="note-card unit2">
+                    <h4>Categorías de Entidad (Trazado)</h4>
+                    <div class="drawing-box">
+                        <div class="s-rect shape">Nombre</div>
+                        <div class="shape-desc"><b>Fuerte:</b> Tienen existencias por sí mismos.</div>
+                    </div>
+                    <div class="drawing-box">
+                        <div class="s-rect-double shape"><span style="padding: 5px 15px;">Nombre</span></div>
+                        <div class="shape-desc"><b>Débil:</b> Depende de que exista un ejemplar de otro tipo de entidad fuerte.</div>
+                    </div>
+                    <p><i>Ejemplos:</i> [Empleado]-[Dependiente], [Dueño]-[Mascota].</p>
+                </div>
+            </div>
+
+            <div id="u2-2" class="section">
+                <h2>2.2 Atributos y Trazados</h2>
+
+                <div class="note-card unit2">
+                    <h4>¿Qué es un Atributo?</h4>
+                    <p>Características que describen a las entidades/relaciones. Un ejemplar de atributo es un <b>Valor</b>.</p>
+                </div>
+
+                <div class="note-card unit2">
+                    <h4>Tipos de Atributos (Gráfica)</h4>
+                    <ul>
+                        <li><b>Simple:</b> Óvalo normal.</li>
+                        <li><b>Compuesto:</b> Óvalo del que salen más óvalos. (<b>Atómico:</b> Expresión mínima).</li>
+                        
+                        <div class="drawing-box">
+                            <div class="s-oval-double shape"><span style="padding: 4px 15px;">Nombre</span></div>
+                            <div class="shape-desc"><b>Multivalor:</b> Varios valores permitidos.</div>
+                        </div>
+
+                        <div class="drawing-box">
+                            <div class="s-oval-dash shape">Nombre</div>
+                            <div class="shape-desc"><b>Derivado:</b> Obtenido mediante procesamiento.</div>
+                        </div>
+
+                        <div class="drawing-box">
+                            <div class="s-oval shape" style="text-decoration: underline;">Nombre</div>
+                            <div class="shape-desc"><b>Atributo Llave:</b> Restricción de unicidad (valor distinto para cada ejemplar).</div>
+                        </div>
+
+                        <div class="drawing-box">
+                            <div class="s-oval shape" style="border-bottom: 2px dashed #333; text-decoration: none;">Nombre</div>
+                            <div class="shape-desc"><b>Atributo Parcial:</b> Llave de la entidad débil.</div>
+                        </div>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="u2-3" class="section">
+                <h2>2.3 Vínculos (Relaciones)</h2>
+
+                <div class="note-card unit2">
+                    <h4>Tipo de Relación vs Relación</h4>
+                    <p>Es una asociación entre dos o más tipos de entidades. Se representa con una <b>Acción / Verbo</b>. Hay necesidad de conocer sus atributos llaves de las entidades asociadas.</p>
+                </div>
+
+                <div class="note-card unit2">
+                    <h4>Categorías de Relación (Con trazado)</h4>
+                    <div class="drawing-box">
+                        <div style="width: 50px; text-align: center;"><div class="s-diamond"></div></div>
+                        <div class="shape-desc"><b>Regular:</b> Permite asociar tipos de entidad fuertes.</div>
+                    </div>
+                    <div class="drawing-box">
+                        <div style="width: 50px; text-align: center;"><div class="s-diamond-double"></div></div>
+                        <div class="shape-desc"><b>Identificadora:</b> Asocia una entidad fuerte con una débil (Dependencia directa).</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================= UNIDAD 3 ======================= -->
+
+            <div id="u3-1" class="section">
+                <h2>Unidad 3: Estructuras Lógicas y Transformación</h2>
+
+                <div class="note-card unit3">
+                    <h4>Estructuras Lógicas de BD</h4>
+                    <p><b>Proceso de Normalización:</b>
+                    <ul>
+                        <li>1.FN (Primera Forma Normal)</li>
+                        <li>2.FN (Segunda Forma Normal)</li>
+                        <li>3.FN (Tercera Forma Normal)</li>
+                    </ul>
+                    </p>
+                    <p><b>Método de Transformación:</b> Es el mapeo donde se convierten los diagramas del Modelo Entidad-Relación al Modelo Relacional (Tablas).</p>
+                </div>
+
+                <div class="note-card unit3">
+                    <h4>Fase de Seguridad</h4>
+                    <p>En el diseño lógico también se consideran los métodos operativos:
+                    <ul>
+                        <li>Producir copias de seguridad.</li>
+                        <li>Controles de acceso a los datos.</li>
+                    </ul>
+                    </p>
+                </div>
+            </div>
+
+            <!-- ======================= APOYO VISUAL ======================= -->
+            <div id="apoyo-visual" class="section">
+                <h2>Apoyo Visual y Diagramas</h2>
+                <p>Representaciones gráficas basadas en tus esquemas de clase. Útiles para memorizar estructuras.</p>
+
+                <!-- DIAGRAMA 1 -->
+                <div class="note-card">
+                    <h4>1. Arquitectura de 3 Niveles (ANSI-SPARC)</h4>
+                    <p>Muestra cómo se logra la independencia de datos separando la vista del usuario del hardware.</p>
+                </div>
+                <div class="visual-container">
+                    <div class="level-box lvl-ext">
+                        <span>Vista Ext 1 (U1)</span>
+                        <span>Vista Ext 2 (U2)</span>
+                        <span>Vista Ext n (Un)</span>
+                    </div>
+                    <span style="font-size: 0.8rem; color: #555;">NIVEL EXTERNO (Independencia Lógica)</span>
+                    <div class="arrow-down"></div>
+                    
+                    <div class="level-box lvl-con">Esquema Conceptual (DBA / Diseñador)</div>
+                    <span style="font-size: 0.8rem; color: #555;">NIVEL CONCEPTUAL (Independencia Física)</span>
+                    <div class="arrow-down"></div>
+                    
+                    <div class="level-box lvl-int">Esquema Interno (Almacenamiento / DBA)</div>
+                    <span style="font-size: 0.8rem; color: #555;">NIVEL INTERNO (Bajo Nivel)</span>
+                    <div class="arrow-down"></div>
+
+                    <div class="db-cylinders">
+                        <div class="cylinder"></div>
+                        <div class="cylinder"></div>
+                        <div class="cylinder"></div>
+                    </div>
+                    <span style="font-size: 0.8rem; color: #555; margin-top:5px;">BASES DE DATOS FÍSICAS</span>
+                </div>
+
+                <!-- DIAGRAMA 2 -->
+                <div class="note-card">
+                    <h4>2. Arquitectura Interna de un SGBD</h4>
+                    <p>El flujo desde que el usuario manda una petición hasta que se busca en el disco.</p>
+                </div>
+                <div class="visual-container">
+                    <div class="sgbd-arch">
+                        <div class="sgbd-row" style="color:#555; font-weight:bold;">
+                            <div>Usuarios</div> <div>Formularios / Frontend</div> <div>Interfaz SQL</div>
+                        </div>
+                        <div style="text-align:center;"><div class="arrow-down" style="margin: 0 auto;"></div>Comandos SQL</div>
+                        
+                        <!-- CORE SGBD -->
+                        <div class="sgbd-core">
+                            <div style="text-align: center; color: #9c27b0; font-weight: bold; margin-bottom: 10px;">MOTOR SGBD</div>
+                            <div class="sgbd-row">
+                                <div class="sgbd-box">Parser (Compilador)</div>
+                                <div class="sgbd-box">Optimizador (Árbol Canónico)</div>
+                            </div>
+                            <div class="sgbd-row" style="margin-top:10px;">
+                                <div class="sgbd-box">Ejecutor del Plan</div>
+                                <div class="sgbd-box">Evaluador de Operadores</div>
+                            </div>
+                            
+                            <div style="display:flex; justify-content:space-around; margin-top:15px;">
+                                <div class="arrow-down"></div><div class="arrow-down"></div>
+                            </div>
+
+                            <div class="sgbd-row">
+                                <div class="sgbd-box">Admin. de Transacciones</div>
+                                <div class="sgbd-box">Archivos y Métodos de Acceso</div>
+                                <div class="sgbd-box">Admin. de Recuperación</div>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align:center;"><div class="arrow-down" style="margin: 0 auto;"></div>Catálogo (Diccionario) / Discos Físicos</div>
+                    </div>
+                </div>
+
+                <!-- DIAGRAMA 3 -->
+                <div class="note-card">
+                    <h4>3. Ejemplo de Diagrama Entidad-Relación (Trazado)</h4>
+                    <p>Ejemplo de una Entidad Fuerte con una Débil (Dependencia Directa).</p>
+                </div>
+                <div class="visual-container">
+                    <div class="er-example">
+                        <!-- Atributos Empleado -->
+                        <div class="col-flex">
+                            <div class="s-oval shape" style="text-decoration: underline;">ID_Emp</div>
+                            <div class="er-line vertical"></div>
+                        </div>
+                        <div class="col-flex" style="margin: 0 10px;">
+                            <div class="s-oval shape">Nombre</div>
+                            <div class="er-line vertical"></div>
+                        </div>
+                        <div class="col-flex">
+                            <div class="s-oval-double shape"><span style="padding: 2px 10px;">Teléfonos</span></div>
+                            <div class="er-line vertical"></div>
+                        </div>
+                    </div>
+
+                    <div class="er-example" style="padding-top:0;">
+                        <!-- Entidad Fuerte -->
+                        <div class="s-rect shape">EMPLEADO</div>
+                        <div class="er-line"></div>
+                        
+                        <!-- Relación Identificadora -->
+                        <div style="width: 50px; text-align: center;"><div class="s-diamond-double"></div></div>
+                        <span style="position:absolute; margin-top: 50px; font-size:0.8rem; font-weight:bold;">Tiene</span>
+                        
+                        <div class="er-line"></div>
+                        
+                        <!-- Entidad Débil -->
+                        <div class="s-rect-double shape"><span style="padding: 5px 15px;">DEPENDIENTE</span></div>
+                        
+                        <div class="er-line"></div>
+                        <!-- Atributo Parcial de la débil -->
+                        <div class="s-oval shape" style="border-bottom: 2px dashed #333; text-decoration: none;">Nombre_Dep</div>
+                    </div>
+                    
+                    <div style="margin-top: 15px; color: #555; font-size: 0.9rem; text-align: center;">
+                        <b>Lectura:</b> El EMPLEADO (fuerte) tiene una llave principal (ID_Emp), un atributo simple (Nombre) y uno multivalor (Teléfonos). Está asociado mediante una <i>relación identificadora</i> (rombo doble) a un DEPENDIENTE (débil), el cual se identifica por una <i>llave parcial</i> (subrayado punteado).
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================= PRÁCTICA (CASOS DE ESTUDIO) ======================= -->
+            <div id="practica" class="section">
+                <h2>Práctica: Casos de Estudio (E-R)</h2>
+                <p>Lee detenidamente las reglas de negocio de cada caso, identifica las entidades (Fuertes o Débiles) y define sus vínculos (Regulares o Identificadoras) junto con su cardinalidad.</p>
+
+                <!-- ================= CASO 1: METRO ================= -->
+                <div class="note-card" style="background:#e8eaf6; border-left-color:#3f51b5;">
+                    <h4 style="color:#283593;"><i class="fas fa-train"></i> Caso 1: Sistema de Líneas de Metro (Visto en clase)</h4>
+                    <ol style="color: #333;">
+                        <li>Una línea está compuesta por una serie de estaciones en un orden determinado.</li>
+                        <li>Cada estación pertenece a al menos una línea pudiendo pertenecer a varias.</li>
+                        <li>Una estación nunca deja de pertenecer a la línea a la que originalmente pertenece.</li>
+                        <li>Cada estación puede tener varios accesos pero un acceso solo puede pertenecer a una estación.</li>
+                        <li>Un acceso nunca podrá cambiar de estación.</li>
+                        <li>Cada línea tiene asignado una serie de trenes (un tren no puede estar en más de una línea al mismo tiempo).</li>
+                        <li>Algunas estaciones tienen cocheras y cada tren tiene asignada una cochera.</li>
+                    </ol>
+                </div>
+
+                <details>
+                    <summary>Ver Solución: Caso 1</summary>
+                    <div class="details-content">
+                        <b style="color: #00695c;">PASO 2: Entidades</b>
+                        <ul>
+                            <li><b>Línea, Estación, Tren:</b> Entidades Fuertes.</li>
+                            <li><b>Acceso, Cochera:</b> Entidades Débiles (Dependen existencialmente de la Estación).</li>
+                        </ul>
+                        <b style="color: #00695c;">PASO 3: Relaciones y Cardinalidad</b>
+                        <ul style="font-family: monospace; font-size: 1.05rem;">
+                            <li>Línea _compuesta_ Estación &nbsp;-> <b>M : N &nbsp;(Regular)</b></li>
+                            <li>Estación _tiene_ Acceso &nbsp;&nbsp;&nbsp;&nbsp;-> <b>1 : N &nbsp;(Identificadora)</b></li>
+                            <li>Línea _asigna_ Tren &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> <b>1 : N &nbsp;(Regular)</b></li>
+                            <li>Estación _tiene_ Cochera &nbsp;&nbsp;&nbsp;-> <b>1 : 1 &nbsp;(Identificadora)</b></li>
+                            <li>Tren _asignado_ Cochera &nbsp;&nbsp;&nbsp;&nbsp;-> <b>1 : 1 &nbsp;(Regular)</b></li>
+                        </ul>
+                    </div>
+                </details>
+
+                <!-- ================= CASO 2: BIBLIOTECA ================= -->
+                <div class="note-card" style="background:#e8f5e9; border-left-color:#4caf50; margin-top:30px;">
+                    <h4 style="color:#2e7d32;"><i class="fas fa-book"></i> Caso 2: Biblioteca Universitaria</h4>
+                    <ol style="color: #333;">
+                        <li>Un libro puede ser escrito por uno o varios autores, y un autor puede escribir varios libros.</li>
+                        <li>La biblioteca tiene múltiples ejemplares físicos del mismo libro. Cada ejemplar se identifica por un número de copia, pero si el libro desaparece del sistema, sus ejemplares también.</li>
+                        <li>Los usuarios de la biblioteca tienen una credencial con ID único.</li>
+                        <li>Un usuario puede pedir prestados varios ejemplares a lo largo del tiempo, pero un ejemplar físico en específico solo puede ser prestado a un usuario a la vez.</li>
+                    </ol>
+                </div>
+
+                <details>
+                    <summary>Ver Solución: Caso 2</summary>
+                    <div class="details-content">
+                        <b style="color: #00695c;">PASO 2: Entidades</b>
+                        <ul>
+                            <li><b>Libro, Autor, Usuario:</b> Entidades Fuertes.</li>
+                            <li><b>Ejemplar:</b> Entidad Débil (Depende del Libro para existir. Su llave parcial es el "número de copia").</li>
+                        </ul>
+                        <b style="color: #00695c;">PASO 3: Relaciones y Cardinalidad</b>
+                        <ul style="font-family: monospace; font-size: 1.05rem;">
+                            <li>Libro _escrito por_ Autor &nbsp;&nbsp;-> <b>M : N &nbsp;(Regular)</b></li>
+                            <li>Libro _tiene_ Ejemplar &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> <b>1 : N &nbsp;(Identificadora)</b></li>
+                            <li>Usuario _pide_ Ejemplar &nbsp;&nbsp;&nbsp;&nbsp;-> <b>1 : N &nbsp;(Regular)</b></li>
+                        </ul>
+                    </div>
+                </details>
+
+                <!-- ================= CASO 3: HOSPITAL ================= -->
+                <div class="note-card" style="background:#fff3e0; border-left-color:#ff9800; margin-top:30px;">
+                    <h4 style="color:#e65100;"><i class="fas fa-hospital-user"></i> Caso 3: Gestión de Hospital</h4>
+                    <ol style="color: #333;">
+                        <li>Un hospital está compuesto por varios departamentos (Cardiología, Pediatría, etc.).</li>
+                        <li>Un médico trabaja exclusivamente para un departamento, pero un departamento tiene muchos médicos.</li>
+                        <li>Un paciente que llega al hospital puede ser atendido por diferentes médicos durante su estancia.</li>
+                        <li>A cada paciente se le genera un Historial Clínico único. Si el registro del paciente se borra por normativa legal, su historial clínico también debe ser destruido obligatoriamente.</li>
+                    </ol>
+                </div>
+
+                <details>
+                    <summary>Ver Solución: Caso 3</summary>
+                    <div class="details-content">
+                        <b style="color: #00695c;">PASO 2: Entidades</b>
+                        <ul>
+                            <li><b>Departamento, Médico, Paciente:</b> Entidades Fuertes.</li>
+                            <li><b>Historial Clínico:</b> Entidad Débil (Su existencia depende totalmente del Paciente).</li>
+                        </ul>
+                        <b style="color: #00695c;">PASO 3: Relaciones y Cardinalidad</b>
+                        <ul style="font-family: monospace; font-size: 1.05rem;">
+                            <li>Depto _emplea_ Médico &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> <b>1 : N &nbsp;(Regular)</b></li>
+                            <li>Médico _atiende a_ Paciente -> <b>M : N &nbsp;(Regular)</b></li>
+                            <li>Paciente _tiene_ Historial &nbsp;-> <b>1 : 1 &nbsp;(Identificadora)</b></li>
+                        </ul>
+                    </div>
+                </details>
+
+                <!-- ================= CASO 4: PROYECTOS ================= -->
+                <div class="note-card" style="background:#fce4ec; border-left-color:#e91e63; margin-top:30px;">
+                    <h4 style="color:#c2185b;"><i class="fas fa-briefcase"></i> Caso 4: Empresa de Software</h4>
+                    <ol style="color: #333;">
+                        <li>La empresa gestiona Proyectos. Cada proyecto tiene un Código único, Nombre y Presupuesto.</li>
+                        <li>La empresa tiene muchos Empleados. Cada empleado pertenece a un solo equipo de trabajo (Ej: QA, Backend).</li>
+                        <li>Un empleado puede estar asignado a varios proyectos simultáneamente, y un proyecto requiere la participación de muchos empleados.</li>
+                        <li>Un empleado puede tener registrados los datos de sus familiares (Beneficiarios) para el seguro médico. Un beneficiario solo tiene sentido en el sistema si está vinculado a un empleado activo.</li>
+                    </ol>
+                </div>
+
+                <details>
+                    <summary>Ver Solución: Caso 4</summary>
+                    <div class="details-content">
+                        <b style="color: #00695c;">PASO 2: Entidades</b>
+                        <ul>
+                            <li><b>Proyecto, Empleado, Equipo:</b> Entidades Fuertes.</li>
+                            <li><b>Beneficiario:</b> Entidad Débil (Depende de un Empleado).</li>
+                        </ul>
+                        <b style="color: #00695c;">PASO 3: Relaciones y Cardinalidad</b>
+                        <ul style="font-family: monospace; font-size: 1.05rem;">
+                            <li>Equipo _tiene_ Empleado &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> <b>1 : N &nbsp;(Regular)</b></li>
+                            <li>Empleado _trabaja en_ Proy. -> <b>M : N &nbsp;(Regular)</b></li>
+                            <li>Empleado _registra_ Benef. &nbsp;-> <b>1 : N &nbsp;(Identificadora)</b></li>
+                        </ul>
+                    </div>
+                </details>
+
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        function openSec(id) {
+            // Ocultar secciones
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            // Quitar estilo activo a botones
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            
+            // Activar nuevo
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+
+            // Scroll suave hacia arriba en el content area
+            document.querySelector('.content-area').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
