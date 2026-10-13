@@ -674,6 +674,7 @@
                         <li>Un empleado puede tener registrados los datos de sus familiares (Beneficiarios) para el seguro médico. Un beneficiario solo tiene sentido en el sistema si está vinculado a un empleado activo.</li>
                     </ol>
                 </div>
+                
 
                 <details>
                     <summary>Ver Solución: Caso 4</summary>
@@ -693,6 +694,46 @@
                 </details>
 
             </div>
+                        <!-- ================= CASO 5: LIBROS DEPARTAMENTALES (NUEVO) ================= -->
+                <div class="note-card" style="background:#e0f7fa; border-left-color:#00bcd4; margin-top:30px;">
+                    <h4 style="color:#00838f;"><i class="fas fa-university"></i> Caso 5: Libros Departamentales (Ejercicio Extra)</h4>
+                    <ol style="color: #333;">
+                        <li>Cada <b>departamento</b> puede adquirir anualmente y a un cierto precio un número de <b>ejemplares</b> de un libro que pasan a ser de su propiedad. Se les asigna un número de ejemplar basado en el ISBN.</li>
+                        <li>De cada <b>libro</b> interesa su título, autor, editorial, año de publicación y su código ISBN que lo identifica unitariamente.</li>
+                        <li>Los ejemplares pueden ser tomados en calidad de préstamo por los <b>profesores</b> del centro universitario, pertenezcan o no al departamento propietario del ejemplar.</li>
+                        <li>Se guardará información sobre los profesores: su nombre, dirección, teléfono y el departamento al que pertenecen.</li>
+                        <li>Por cada vez que se haya prestado un ejemplar, queremos saber a quién, la fecha de retirada y la fecha de devolución (para que quede un histórico en la base de datos).</li>
+                    </ol>
+                </div>
+
+                <details>
+                    <summary>Ver Solución: Caso 5</summary>
+                    <div class="details-content">
+                        <b style="color: #00695c;">PASO 2: Identificación de Entidades</b>
+                        <ul>
+                            <li><b>Libro:</b> Entidad Fuerte <i>(Su llave es el ISBN)</i>.</li>
+                            <li><b>Departamento:</b> Entidad Fuerte.</li>
+                            <li><b>Profesor:</b> Entidad Fuerte.</li>
+                            <li><b>Ejemplar:</b> Entidad Débil <i>(Justificación: El texto dice explícitamente que su número asignado está "basado por el ISBN", por lo tanto, no tiene existencia independiente y depende del Libro)</i>.</li>
+                        </ul>
+                        <br>
+                        <b style="color: #00695c;">PASO 3: Relaciones y Cardinalidad</b>
+                        <ul style="font-family: monospace; font-size: 1.05rem;">
+                            <li>Libro _tiene_ Ejemplar &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> <b>1 : N &nbsp;(Identificadora)</b><br>
+                            <span style="font-size:0.85rem; font-family:sans-serif; color:#555;">(Identificadora porque une a la Fuerte 'Libro' con la Débil 'Ejemplar').</span></li>
+                            <br>
+                            <li>Depto _propietario_ Ejemplar &nbsp;&nbsp;&nbsp;-> <b>1 : N &nbsp;(Regular)</b><br>
+                            <span style="font-size:0.85rem; font-family:sans-serif; color:#555;">(Un departamento compra muchos ejemplares, un ejemplar pertenece a un depto).</span></li>
+                            <br>
+                            <li>Profesor _pertenece a_ Depto &nbsp;&nbsp;&nbsp;-> <b>N : 1 &nbsp;(Regular)</b><br>
+                            <span style="font-size:0.85rem; font-family:sans-serif; color:#555;">(Muchos profesores pertenecen a un solo departamento).</span></li>
+                            <br>
+                            <li>Profesor _pide prestado_ Ejemplar -> <b>M : N &nbsp;(Regular)</b><br>
+                            <span style="font-size:0.85rem; font-family:sans-serif; color:#d32f2f;">¡OJO AQUÍ!: Como el sistema pide guardar un historial de las veces que se prestó, esta relación M:N debe llevar atributos propios: <b>Fecha_Retirada</b> y <b>Fecha_Devolución</b>.</span></li>
+                        </ul>
+                    </div>
+                </details>
+                        
         </div>
         
     </div>
