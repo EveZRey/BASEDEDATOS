@@ -733,7 +733,61 @@
                         </ul>
                     </div>
                 </details>
-                        
+
+                        <!-- ================= TEORÍA DE PARTICIPACIONES (¡NUEVO!) ================= -->
+                <div class="note-card" style="background:#efebe9; border-left-color:#7d4e3a; margin-top:40px;">
+                    <h4 style="color:#4e342e;"><i class="fas fa-link"></i> Concepto Clave: Participaciones en las Relaciones</h4>
+                    <p>La **Participación** define si la existencia de una entidad depende o no de que esté relacionada con otra (¡Pregunta obligada de examen!). El profesor lo evaluará así en tus diagramas:</p>
+                    <ul style="color: #333; margin-top: 10px;">
+                        <li><b>Participación Total (Doble línea ═):</b> Significa que <span class="highlight">obligatoriamente</span> cada ejemplar de la entidad debe estar en la relación. 
+                            <br><i>Ejemplo:</i> Todo <b>PROYECTO</b> debe tener <b>forzosamente (Total)</b> un Investigador Principal[cite: 48].</li>
+                        <li><b>Participación Parcial (Línea sencilla ─):</b> Significa que es opcional. Un ejemplar de la entidad puede o no estar en la relación.
+                            <br><i>Ejemplo:</i> Un <b>PROFESOR</b> puede estar o no <b>(Parcial)</b> asignado a un proyecto[cite: 48] (en reparación, etc.).</li>
+                    </ul>
+                </div>
+
+                <!-- ================= CASO 6: CENTRO DE INVESTIGACIÓN (NUEVO) ================= -->
+                <div class="note-card" style="background:#fce4ec; border-left-color:#e91e63; margin-top:30px;">
+                    <h4 style="color:#880e4f;"><i class="fas fa-microscope"></i> Caso 6: Centro de Investigación (Caso de Examen)</h4>
+                    <p><b>Centro de Investigación de la UAM:</b> El Departamento de Sistemas necesita una BD para la gestión de profesores que participan en proyectos[cite: 48]. Requerimientos del sistema:</p>
+                    <ol style="color: #333;">
+                        <li><b>Proyecto de Investigación:</b> Identificador único, nombre, presupuesto, programa, fecha inicio, fecha fin, descripción[cite: 48].</li>
+                        <li><b>Profesores:</b> ID único, nombre (pila y apellido paterno), despacho, teléfono (multivalor). Pueden ser doctor o no doctor (Especialización)[cite: 48].</li>
+                        <li>Un profesor puede trabajar en varios proyectos a la vez, y en un proyecto trabajan varios profesores (período con fecha_inicio y fecha_fin)[cite: 48].</li>
+                        <li><b>Supervisión:</b> Un no doctor es supervisado por un doctor (período fecha_inicio y fecha_fin)[cite: 48].</li>
+                        <li><b>Investigador Principal (IP):</b> De todos, hay uno solo que es el IP (coordinador del proyecto), siempre es el mismo y obligatoriamente debe ser doctor[cite: 48].</li>
+                        <li><b>Publicaciones:</b> Código único, título. Puede ser tipo <b>Revista</b> (volumen, número, pág_inicio, pág_fin) o <b>Congreso</b> (tipo, ciudad, país, fecha_inicio, fecha_fin) (Especialización Disyunta 'D')[cite: 48].</li>
+                    </ol>
+                </div>
+
+                <details>
+                    <summary>Ver Solución y Participaciones: Caso 6</summary>
+                    <div class="details-content">
+                        <b style="color: #880e4f;">PASO 2: Entidades Fuertes (F) y Débiles (D)</b>
+                        <ul>
+                            <li><b>PROYECTO (F), PROFESOR (F), DEPARTAMENTO (F):</b> Tienen existencia propia[cite: 48].</li>
+                            <li><b>REVISTA (D), CONGRESO (D):</b> En tus apuntes están marcados como 'D' (Especializaciones Débiles / Disyuntas de la superclase PUBLICACIÓN)[cite: 48].</li>
+                        </ul>
+                        <br>
+                        <b style="color: #880e4f;">PASO 3: Relaciones, Cardinalidades y Participaciones (Doble línea)</b>
+                        <ul style="font-family: monospace; font-size: 0.95rem;">
+                            <li>PROFESOR _trabaja_ PROYECTO &nbsp;-> <b>M : N &nbsp;(Regular)</b>
+                                <br><span style="font-size:0.85rem; font-family:sans-serif; color:#555;">─ Participación Parcial (Un profesor puede estar de baja o reparación)[cite: 48]. Lleva atributos de relación: <b>fecha_inicio</b> y <b>fecha_fin</b>[cite: 48].</span></li>
+                            <br>
+                            <li>DOCTOR (Profesor) _es IP de_ PROYECTO -> <b>1 : N &nbsp;(Regular)</b>
+                                <br><span style="font-size:0.85rem; font-family:sans-serif; color:#d32f2f;">═ Participación TOTAL (doble línea) del lado de PROYECTO</span><span style="font-size:0.85rem; font-family:sans-serif; color:#555;"> (obligado tener un IP de por vida)[cite: 48].</span></li>
+                            <br>
+                            <li>DOCTOR _supervisa_ NO DOCTOR &nbsp;-> <b>1 : N &nbsp;(Relación de jerarquía)</b>
+                                <br><span style="font-size:0.85rem; font-family:sans-serif; color:#555;">─ Supervisión (Con período: fecha_inicio y fecha_fin). Participación Parcial[cite: 48].</span></li>
+                            <br>
+                            <li>PROFESOR _pertenece_ DEPARTAMENTO -> <b>N : 1 &nbsp;(Regular)</b>
+                                <br><span style="font-size:0.85rem; font-family:sans-serif; color:#d32f2f;">═ Participación TOTAL (doble línea) del lado de PROFESOR</span><span style="font-size:0.85rem; font-family:sans-serif; color:#555;"> (obligado pertenecer a Sistemas)[cite: 48].</span></li>
+                            <br>
+                            <li>PROFESORES _escriben_ PUBLICACIÓN -> <b>M : N &nbsp;(Regular)</b>
+                                <br><span style="font-size:0.85rem; font-family:sans-serif; color:#555;">─ Participación Parcial (Tanto doctor como no doctor escriben)[cite: 48].</span></li>
+                        </ul>
+                    </div>
+                </details>
         </div>
         
     </div>
