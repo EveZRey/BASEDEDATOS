@@ -1695,7 +1695,379 @@
 
                     </div>
                 </details>
+                <!-- ================= CASO 9: ORGANIZACIÓN SOFTECK ================= -->
+                <div class="note-card" style="background:#e0f2f1; border-left-color:#00796b; margin-top:30px;">
+                    <h4 style="color:#004d40;"><i class="fas fa-shield-halved"></i> Caso 9: Organización SofTeck (Ternaria, Recursiva y Especialización)</h4>
+                    <p>La Organización SofTeck necesita crear un único entorno de ejecución que permita controlar la seguridad de acceso para todas sus aplicaciones informáticas:</p>
+                    <ol style="color: #333;">
+                        <li><b>Perfiles, Usuarios y Subsistemas:</b> La unidad básica de acceso a los subsistemas es el <b>perfil de acceso</b> (código y descripción). Un usuario tendrá acceso a todos los subsistemas a los que permiten acceder los distintos perfiles de que disfruta (al menos uno). Un perfil permite el acceso a al menos un subsistema y para cualquier subsistema habrá siempre un perfil que permita acceder al mismo. Un mismo perfil pueden tenerlo dos usuarios distintos.</li>
+                        <li><b>Usuarios, Terminales y Turnos (Ternaria):</b> De cada <b>usuario</b> se mantiene su clave (única), nombre y teléfonos (multivalor). Trabajan en distintos <b>terminales</b> (etiquetados por un código secuencial) dependiendo del <b>turno de trabajo</b> (día, tarde, noche) rotatorio. En el período comprendido entre dos fechas concretas (<i>fecha_inicio, fecha_fin</i>), trabajan en un turno y terminal determinados.</li>
+                        <li><b>Subsistemas, Ventanas y Controles:</b> De los <b>subsistemas</b> se mantiene código, descripción y la <b>ventana</b> en la que arranca (puede haber ventanas que sean las mismas al arrancar distintos subsistemas). Las ventanas (código y descripción) están compuestas por <b>controles</b> (código y descripción), y toda ventana tendrá además un control que permite cerrarla. Todo control ha de emplearse al menos en una ventana y el mismo control puede emplearse en distintas ventanas.</li>
+                        <li><b>Tipos de Controles y Menús Jerárquicos:</b> Los controles pueden ser de dos tipos: <b>botones</b> (se guarda el nombre del icono) o <b>ítems de menú</b> (se guarda forzosamente el texto en pantalla). Para soportar la estructura jerárquica de menús, de un ítem de menú pueden depender otros ítems, pero un mismo ítem no puede depender de varios ítems.</li>
+                        <li><b>Acciones y sus Tipos:</b> La activación de un control tiene como consecuencia la ejecución de una única <b>acción</b> (código y descripción), y una acción requiere siempre un control que pueda ejecutarla. Las acciones pueden ser de dos tipos: <b>de función</b> (ejecutan una función interna de la que se guarda el nombre) y <b>de llamada</b> (invocan una única ventana, y las ventanas pueden ser o no invocadas por varias llamadas).</li>
+                    </ol>
+                </div>
 
+                <details>
+                    <summary>Ver Solución Completa: Caso 9 (Entidades, Tabla de Relaciones y Diagrama)</summary>
+                    <div class="details-content">
+                        
+                        <h4 style="color: #004d40; margin-top: 0;">1. Identificación de Entidades y Subclases</h4>
+                        <ul>
+                            <li><b>USUARIO (Fuerte):</b> Llave Primaria <u>Clave</u>. Atributos: Nombre, Teléfonos (multivalor, doble óvalo).</li>
+                            <li><b>TERMINAL (Fuerte):</b> Llave Primaria <u>Cód_Secuencial</u>.</li>
+                            <li><b>TURNO (Fuerte):</b> Llave Primaria <u>ID_Turno</u> (Día, Tarde, Noche).</li>
+                            <li><b>PERFIL (Fuerte):</b> Llave Primaria <u>Cód_Perfil</u>, Descripción.</li>
+                            <li><b>SUBSISTEMA (Fuerte):</b> Llave Primaria <u>Cód_Sub</u>, Descripción.</li>
+                            <li><b>VENTANA (Fuerte):</b> Llave Primaria <u>Cód_Vent</u>, Descripción.</li>
+                            <li><b>CONTROL (Superclase Fuerte):</b> Llave Primaria <u>Cód_Ctrl</u>, Descripción.
+                                <ul>
+                                    <li><i>Subclases de CONTROL (Triángulo ISA Disyunto <b>"d"</b> y Total):</i>
+                                        <br>• <b>BOTÓN:</b> Atributo propio <i>Nombre_Icono</i>.
+                                        <br>• <b>ÍTEM_MENÚ:</b> Atributo propio <i>Texto_Pantalla</i>. Tiene una <b>relación recursiva (1:N)</b> consigo mismo para formar submenús.
+                                    </li>
+                                </ul>
+                            </li>
+                            <li><b>ACCIÓN (Superclase Fuerte):</b> Llave Primaria <u>Cód_Acc</u>, Descripción.
+                                <ul>
+                                    <li><i>Subclases de ACCIÓN (Triángulo ISA Disyunto <b>"d"</b> y Total):</i>
+                                        <br>• <b>DE_FUNCIÓN:</b> Atributo propio <i>Nombre_Función</i>.
+                                        <br>• <b>DE_LLAMADA:</b> Se relaciona exclusivamente con VENTANA (invoca una única ventana).
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <h4 style="color: #004d40; margin-top: 20px;">2. Tabla de Relaciones (Tipo, Participación y Cardinalidad)</h4>
+                        <div class="table-responsive">
+                            <table class="rel-table">
+                                <thead>
+                                    <tr>
+                                        <th>Relación (Vínculo)</th>
+                                        <th>Entidades Asociadas</th>
+                                        <th>Tipo</th>
+                                        <th>Participación</th>
+                                        <th>Cardinalidad</th>
+                                        <th>Atributos / Regla de Negocio</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><b>Trabaja_en</b></td>
+                                        <td>USUARIO — TERMINAL — TURNO</td>
+                                        <td><b>Ternaria</b> (Grado 3)</td>
+                                        <td>USUARIO: <span class="badge-total">Total ═</span><br>TERMINAL: <span class="badge-parcial">Parcial ─</span><br>TURNO: <span class="badge-total">Total ═</span></td>
+                                        <td><b>M : N : P</b></td>
+                                        <td>Atributos del rombo: <b>Fecha_Ini</b> y <b>Fecha_Fin</b>. Registra en qué terminal y turno trabaja el usuario en cada período.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Disfruta</b></td>
+                                        <td>USUARIO (M) — PERFIL (N)</td>
+                                        <td>Regular</td>
+                                        <td>USUARIO: <span class="badge-total">Total ═</span><br>PERFIL: <span class="badge-parcial">Parcial ─</span></td>
+                                        <td><b>M : N</b></td>
+                                        <td>Un usuario disfruta de al menos un perfil; un mismo perfil pueden tenerlo varios usuarios.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Permite_Acceso</b></td>
+                                        <td>PERFIL (M) — SUBSISTEMA (N)</td>
+                                        <td>Regular</td>
+                                        <td>PERFIL: <span class="badge-total">Total ═</span><br>SUBSISTEMA: <span class="badge-total">Total ═</span></td>
+                                        <td><b>M : N</b></td>
+                                        <td>Un perfil accede a al menos un subsistema, y todo subsistema tiene siempre al menos un perfil de acceso.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Arranca_en</b></td>
+                                        <td>VENTANA (1) — SUBSISTEMA (N)</td>
+                                        <td>Regular</td>
+                                        <td>VENTANA: <span class="badge-parcial">Parcial ─</span><br>SUBSISTEMA: <span class="badge-total">Total ═</span></td>
+                                        <td><b>1 : N</b></td>
+                                        <td>Todo subsistema arranca en una ventana, y varios subsistemas pueden compartir la misma ventana de arranque.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Compuesta_por</b></td>
+                                        <td>VENTANA (M) — CONTROL (N)</td>
+                                        <td>Regular</td>
+                                        <td>VENTANA: <span class="badge-total">Total ═</span><br>CONTROL: <span class="badge-total">Total ═</span></td>
+                                        <td><b>M : N</b></td>
+                                        <td>Las ventanas se componen de controles, y todo control se emplea en al menos una o varias ventanas.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Cierra</b></td>
+                                        <td>CONTROL (1) — VENTANA (N)</td>
+                                        <td>Regular</td>
+                                        <td>CONTROL: <span class="badge-parcial">Parcial ─</span><br>VENTANA: <span class="badge-total">Total ═</span></td>
+                                        <td><b>1 : N</b></td>
+                                        <td>Toda ventana tiene un control específico que permite cerrarla.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Depende_de</b></td>
+                                        <td>ÍTEM_MENÚ Padre (1) — ÍTEM_MENÚ Hijo (N)</td>
+                                        <td><b>Recursiva</b> (Unaria)</td>
+                                        <td>PADRE: <span class="badge-parcial">Parcial ─</span><br>HIJO: <span class="badge-parcial">Parcial ─</span></td>
+                                        <td><b>1 : N</b></td>
+                                        <td>De un ítem pueden depender varios sub-ítems (N), pero un ítem solo depende de un padre como máximo (1).</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Ejecuta</b></td>
+                                        <td>CONTROL (N) — ACCIÓN (1)</td>
+                                        <td>Regular</td>
+                                        <td>CONTROL: <span class="badge-total">Total ═</span><br>ACCIÓN: <span class="badge-total">Total ═</span></td>
+                                        <td><b>N : 1</b></td>
+                                        <td>Todo control ejecuta una única acción (1), y toda acción requiere siempre un control que la ejecute.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Invoca</b></td>
+                                        <td>VENTANA (1) — DE_LLAMADA (N)</td>
+                                        <td>Regular</td>
+                                        <td>VENTANA: <span class="badge-parcial">Parcial ─</span><br>DE_LLAMADA: <span class="badge-total">Total ═</span></td>
+                                        <td><b>1 : N</b></td>
+                                        <td>Cada acción de llamada invoca una única ventana (1); una ventana puede ser invocada o no por varias llamadas (N).</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h4 style="color: #004d40; margin-top: 20px;">3. Diagrama Entidad-Relación Extendido (Caso 9 - SofTeck)</h4>
+                        <div class="svg-diagram-box">
+                            <svg viewBox="0 0 1120 700" xmlns="http://www.w3.org/2000/svg" font-family="Roboto, sans-serif">
+                                <!-- ================= CONEXIONES ================= -->
+                                <!-- Ternaria: USUARIO, TERMINAL, TURNO -> TRABAJA_EN -->
+                                <line x1="150" y1="210" x2="150" y2="145" stroke="#333" stroke-width="2"/>
+                                <line x1="156" y1="210" x2="156" y2="145" stroke="#333" stroke-width="2"/>
+                                <line x1="110" y1="115" x2="70" y2="115" stroke="#333" stroke-width="2"/>
+                                <line x1="70" y1="115" x2="70" y2="85" stroke="#333" stroke-width="2"/>
+                                <line x1="195" y1="112" x2="235" y2="112" stroke="#333" stroke-width="2"/>
+                                <line x1="195" y1="118" x2="235" y2="118" stroke="#333" stroke-width="2"/>
+                                <line x1="232" y1="112" x2="232" y2="85" stroke="#333" stroke-width="2"/>
+                                <line x1="238" y1="118" x2="238" y2="85" stroke="#333" stroke-width="2"/>
+
+                                <!-- USUARIO (Total) -> DISFRUTA -> PERFIL -->
+                                <line x1="215" y1="232" x2="275" y2="232" stroke="#333" stroke-width="2"/>
+                                <line x1="215" y1="238" x2="275" y2="238" stroke="#333" stroke-width="2"/>
+                                <line x1="355" y1="235" x2="405" y2="235" stroke="#333" stroke-width="2"/>
+
+                                <!-- PERFIL (Total) -> PERMITE_ACCESO -> SUBSISTEMA (Total) -->
+                                <line x1="515" y1="232" x2="565" y2="232" stroke="#333" stroke-width="2"/>
+                                <line x1="515" y1="238" x2="565" y2="238" stroke="#333" stroke-width="2"/>
+                                <line x1="655" y1="232" x2="705" y2="232" stroke="#333" stroke-width="2"/>
+                                <line x1="655" y1="238" x2="705" y2="238" stroke="#333" stroke-width="2"/>
+
+                                <!-- SUBSISTEMA (Total) -> ARRANCA_EN -> VENTANA -->
+                                <line x1="825" y1="232" x2="880" y2="232" stroke="#333" stroke-width="2"/>
+                                <line x1="825" y1="238" x2="880" y2="238" stroke="#333" stroke-width="2"/>
+                                <line x1="960" y1="235" x2="1010" y2="235" stroke="#333" stroke-width="2"/>
+                                <line x1="1010" y1="235" x2="1010" y2="335" stroke="#333" stroke-width="2"/>
+
+                                <!-- VENTANA (Total) <-> CONTROL (Total): COMPUESTA y CIERRA -->
+                                <line x1="950" y1="355" x2="850" y2="355" stroke="#333" stroke-width="2"/>
+                                <line x1="950" y1="361" x2="850" y2="361" stroke="#333" stroke-width="2"/>
+                                <line x1="760" y1="355" x2="670" y2="355" stroke="#333" stroke-width="2"/>
+                                <line x1="760" y1="361" x2="670" y2="361" stroke="#333" stroke-width="2"/>
+
+                                <line x1="950" y1="378" x2="850" y2="418" stroke="#333" stroke-width="2"/>
+                                <line x1="950" y1="384" x2="850" y2="424" stroke="#333" stroke-width="2"/>
+                                <line x1="760" y1="420" x2="670" y2="380" stroke="#333" stroke-width="2"/>
+
+                                <!-- CONTROL -> ISA (d) Total -> BOTÓN / ÍTEM_MENÚ -->
+                                <line x1="607" y1="390" x2="607" y2="435" stroke="#333" stroke-width="2"/>
+                                <line x1="613" y1="390" x2="613" y2="435" stroke="#333" stroke-width="2"/>
+                                <line x1="590" y1="475" x2="525" y2="515" stroke="#333" stroke-width="2"/>
+                                <line x1="630" y1="475" x2="700" y2="515" stroke="#333" stroke-width="2"/>
+
+                                <!-- ÍTEM_MENÚ -> RECURSIVA (DEPENDE_DE) -->
+                                <polyline points="755,535 815,535 815,595 795,595" fill="none" stroke="#333" stroke-width="1.8"/>
+                                <polyline points="700,560 700,595 715,595" fill="none" stroke="#333" stroke-width="1.8"/>
+
+                                <!-- CONTROL (Total) -> EJECUTA -> ACCIÓN (Total) -->
+                                <line x1="550" y1="362" x2="465" y2="362" stroke="#333" stroke-width="2"/>
+                                <line x1="550" y1="368" x2="465" y2="368" stroke="#333" stroke-width="2"/>
+                                <line x1="385" y1="362" x2="300" y2="362" stroke="#333" stroke-width="2"/>
+                                <line x1="385" y1="368" x2="300" y2="368" stroke="#333" stroke-width="2"/>
+
+                                <!-- ACCIÓN -> ISA (d) Total -> DE_FUNCIÓN / DE_LLAMADA -->
+                                <line x1="237" y1="390" x2="237" y2="435" stroke="#333" stroke-width="2"/>
+                                <line x1="243" y1="390" x2="243" y2="435" stroke="#333" stroke-width="2"/>
+                                <line x1="220" y1="475" x2="145" y2="515" stroke="#333" stroke-width="2"/>
+                                <line x1="260" y1="475" x2="335" y2="515" stroke="#333" stroke-width="2"/>
+
+                                <!-- DE_LLAMADA (Total) -> INVOCA -> VENTANA -->
+                                <line x1="332" y1="560" x2="332" y2="650" stroke="#333" stroke-width="2"/>
+                                <line x1="338" y1="560" x2="338" y2="650" stroke="#333" stroke-width="2"/>
+                                <line x1="332" y1="650" x2="910" y2="650" stroke="#333" stroke-width="2"/>
+                                <line x1="338" y1="656" x2="910" y2="656" stroke="#333" stroke-width="2"/>
+                                <line x1="990" y1="653" x2="1045" y2="653" stroke="#333" stroke-width="2"/>
+                                <line x1="1045" y1="653" x2="1045" y2="385" stroke="#333" stroke-width="2"/>
+
+                                <!-- ================= NODOS Y ENTIDADES ================= -->
+                                <!-- TERMINAL Y TURNO -->
+                                <line x1="70" y1="40" x2="70" y2="18" stroke="#333" stroke-width="1.5"/>
+                                <rect x="20" y="40" width="100" height="45" fill="#1a237e" stroke="#111" stroke-width="2"/>
+                                <text x="70" y="67" fill="#fff" font-weight="bold" font-size="12" text-anchor="middle">TERMINAL</text>
+                                <ellipse cx="70" cy="14" rx="38" ry="11" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="70" y="18" font-size="9" font-weight="bold" text-decoration="underline" text-anchor="middle">Cód_Sec</text>
+
+                                <line x1="235" y1="40" x2="235" y2="18" stroke="#333" stroke-width="1.5"/>
+                                <rect x="185" y="40" width="100" height="45" fill="#1a237e" stroke="#111" stroke-width="2"/>
+                                <text x="235" y="67" fill="#fff" font-weight="bold" font-size="12" text-anchor="middle">TURNO</text>
+                                <ellipse cx="235" cy="14" rx="38" ry="11" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="235" y="18" font-size="9" font-weight="bold" text-decoration="underline" text-anchor="middle">ID_Turno</text>
+
+                               !-- ROMBO TERNARIO TRABAJA_EN -->
+                                <line x1="152" y1="85" x2="125" y2="55" stroke="#333" stroke-width="1.2"/>
+                                <line x1="152" y1="85" x2="175" y2="55" stroke="#333" stroke-width="1.2"/>
+                                <polygon points="152,85 195,115 152,145 110,115" fill="#ff9800" stroke="#111" stroke-width="2"/>
+                                <text x="152" y="119" font-size="10" font-weight="bold" text-anchor="middle">Trabaja_en</text>
+                                <ellipse cx="122" cy="45" rx="30" ry="11" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="122" y="49" font-size="8" text-anchor="middle">F_Ini</text>
+                                <ellipse cx="182" cy="45" rx="30" ry="11" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="182" y="49" font-size="8" text-anchor="middle">F_Fin</text>
+                                <text x="82" y="108" font-size="11" font-weight="bold">N</text>
+                                <text x="212" y="108" font-size="11" font-weight="bold">P</text>
+                                <text x="162" y="198" font-size="11" font-weight="bold">M</text>
+
+                                <!-- USUARIO -->
+                                <line x1="100" y1="235" x2="45" y2="205" stroke="#333" stroke-width="1.5"/>
+                                <line x1="100" y1="235" x2="45" y2="235" stroke="#333" stroke-width="1.5"/>
+                                <line x1="100" y1="235" x2="45" y2="268" stroke="#333" stroke-width="1.5"/>
+                                <rect x="95" y="210" width="120" height="50" fill="#1a237e" stroke="#111" stroke-width="2"/>
+                                <text x="155" y="240" fill="#fff" font-weight="bold" font-size="13" text-anchor="middle">USUARIO</text>
+                                <ellipse cx="40" cy="200" rx="32" ry="12" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="40" y="204" font-size="9" font-weight="bold" text-decoration="underline" text-anchor="middle">Clave</text>
+                                <ellipse cx="40" cy="235" rx="34" ry="12" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="40" y="239" font-size="9" text-anchor="middle">Nombre</text>
+                                <ellipse cx="42" cy="272" rx="36" ry="13" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <ellipse cx="42" cy="272" rx="32" ry="9" fill="none" stroke="#333" stroke-width="1"/>
+                                <text x="42" y="275" font-size="8" text-anchor="middle">Teléfonos</text>
+
+                                <!-- ROMBO DISFRUTA Y PERFIL -->
+                                <polygon points="315,208 355,235 315,262 275,235" fill="#ffe082" stroke="#e65100" stroke-width="2"/>
+                                <text x="315" y="239" font-size="10" font-weight="bold" text-anchor="middle">Disfruta</text>
+                                <text x="255" y="225" font-size="11" font-weight="bold">M</text>
+                                <text x="385" y="225" font-size="11" font-weight="bold">N</text>
+
+                                <line x1="440" y1="210" x2="420" y2="165" stroke="#333" stroke-width="1.5"/>
+                                <line x1="480" y1="210" x2="500" y2="165" stroke="#333" stroke-width="1.5"/>
+                                <rect x="405" y="210" width="110" height="50" fill="#1a237e" stroke="#111" stroke-width="2"/>
+                                <text x="460" y="240" fill="#fff" font-weight="bold" font-size="13" text-anchor="middle">PERFIL</text>
+                                <ellipse cx="415" cy="155" rx="38" ry="12" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="415" y="159" font-size="9" font-weight="bold" text-decoration="underline" text-anchor="middle">Cód_Perf</text>
+                                <ellipse cx="505" cy="155" rx="36" ry="12" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="505" y="159" font-size="9" text-anchor="middle">Descrip.</text>
+
+                                <!-- ROMBO PERMITE_ACCESO Y SUBSISTEMA -->
+                                <polygon points="610,205 655,235 610,265 565,235" fill="#ffe082" stroke="#e65100" stroke-width="2"/>
+                                <text x="610" y="239" font-size="10" font-weight="bold" text-anchor="middle">Permite_Acc</text>
+                                <text x="545" y="225" font-size="11" font-weight="bold">M</text>
+                                <text x="685" y="225" font-size="11" font-weight="bold">N</text>
+
+                                <line x1="745" y1="210" x2="725" y2="165" stroke="#333" stroke-width="1.5"/>
+                                <line x1="785" y1="210" x2="805" y2="165" stroke="#333" stroke-width="1.5"/>
+                                <rect x="705" y="210" width="120" height="50" fill="#1a237e" stroke="#111" stroke-width="2"/>
+                                <text x="765" y="240" fill="#fff" font-weight="bold" font-size="12" text-anchor="middle">SUBSISTEMA</text>
+                                <ellipse cx="720" cy="155" rx="36" ry="12" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="720" y="159" font-size="9" font-weight="bold" text-decoration="underline" text-anchor="middle">Cód_Sub</text>
+                                <ellipse cx="810" cy="155" rx="36" ry="12" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="810" y="159" font-size="9" text-anchor="middle">Descrip.</text>
+
+                                <!-- ROMBO ARRANCA_EN Y VENTANA -->
+                                <polygon points="920,208 960,235 920,262 880,235" fill="#ffe082" stroke="#e65100" stroke-width="2"/>
+                                <text x="920" y="239" font-size="10" font-weight="bold" text-anchor="middle">Arranca</text>
+                                <text x="855" y="225" font-size="11" font-weight="bold">N</text>
+                                <text x="995" y="325" font-size="11" font-weight="bold">1</text>
+
+                                <line x1="1060" y1="345" x2="1090" y2="305" stroke="#333" stroke-width="1.5"/>
+                                <line x1="1060" y1="375" x2="1090" y2="415" stroke="#333" stroke-width="1.5"/>
+                                <rect x="950" y="335" width="115" height="50" fill="#1a237e" stroke="#111" stroke-width="2"/>
+                                <text x="1007" y="365" fill="#fff" font-weight="bold" font-size="13" text-anchor="middle">VENTANA</text>
+                                <ellipse cx="1080" cy="295" rx="36" ry="12" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="1080" y="299" font-size="9" font-weight="bold" text-decoration="underline" text-anchor="middle">Cód_Vent</text>
+                                <ellipse cx="1080" cy="425" rx="34" ry="12" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="1080" y="429" font-size="9" text-anchor="middle">Descrip.</text>
+
+                                <!-- ROMBOS COMPUESTA Y CIERRA -->
+                                <polygon points="805,333 850,358 805,383 760,358" fill="#ffe082" stroke="#e65100" stroke-width="2"/>
+                                <text x="805" y="362" font-size="10" font-weight="bold" text-anchor="middle">Compuesta</text>
+                                <text x="932" y="348" font-size="11" font-weight="bold">M</text>
+                                <text x="682" y="348" font-size="11" font-weight="bold">N</text>
+
+                                <polygon points="805,395 850,420 805,445 760,420" fill="#ffccbc" stroke="#bf360c" stroke-width="2"/>
+                                <text x="805" y="424" font-size="10" font-weight="bold" text-anchor="middle">Cierra</text>
+                                <text x="932" y="410" font-size="11" font-weight="bold">N</text>
+                                <text x="682" y="405" font-size="11" font-weight="bold">1</text>
+
+                                <!-- CONTROL Y SUBCLASES (BOTÓN / ÍTEM_MENÚ) -->
+                                <line x1="590" y1="340" x2="570" y2="305" stroke="#333" stroke-width="1.5"/>
+                                <line x1="630" y1="340" x2="650" y2="305" stroke="#333" stroke-width="1.5"/>
+                                <rect x="550" y="340" width="120" height="50" fill="#1a237e" stroke="#111" stroke-width="2"/>
+                                <text x="610" y="370" fill="#fff" font-weight="bold" font-size="13" text-anchor="middle">CONTROL</text>
+                                <ellipse cx="565" cy="295" rx="35" ry="12" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="565" y="299" font-size="9" font-weight="bold" text-decoration="underline" text-anchor="middle">Cód_Ctrl</text>
+                                <ellipse cx="655" cy="295" rx="35" ry="12" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="655" y="299" font-size="9" text-anchor="middle">Descrip.</text>
+
+                                <polygon points="610,430 638,472 582,472" fill="#ffd54f" stroke="#111" stroke-width="2"/>
+                                <text x="610" y="463" font-size="10" font-weight="bold" text-anchor="middle">ISA</text>
+                                <circle cx="610" cy="479" r="8" fill="#fff9c4" stroke="#111" stroke-width="1.5"/>
+                                <text x="610" y="483" font-size="10" font-weight="bold" text-anchor="middle">d</text>
+
+                                <line x1="520" y1="560" x2="520" y2="590" stroke="#333" stroke-width="1.5"/>
+                                <rect x="470" y="515" width="100" height="45" fill="#bbdefb" stroke="#111" stroke-width="2"/>
+                                <text x="520" y="542" font-weight="bold" font-size="12" text-anchor="middle">BOTÓN</text>
+                                <ellipse cx="520" cy="600" rx="44" ry="12" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="520" y="604" font-size="9" text-anchor="middle">Nom_Icono</text>
+
+                                <line x1="650" y1="538" x2="615" y2="538" stroke="#333" stroke-width="1.5"/>
+                                <rect x="650" y="515" width="105" height="45" fill="#bbdefb" stroke="#111" stroke-width="2"/>
+                                <text x="702" y="542" font-weight="bold" font-size="12" text-anchor="middle">ÍTEM_MENÚ</text>
+                                <ellipse cx="585" cy="538" rx="36" ry="12" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="585" y="542" font-size="9" text-anchor="middle">Texto_Pant</text>
+
+                                <!-- ROMBO RECURSIVO DEPENDE_DE -->
+                                <polygon points="755,572 795,595 755,618 715,595" fill="#ffe082" stroke="#e65100" stroke-width="2"/>
+                                <text x="755" y="599" font-size="9" font-weight="bold" text-anchor="middle">Depende</text>
+                                <text x="822" y="565" font-size="11" font-weight="bold">1</text>
+                                <text x="685" y="588" font-size="11" font-weight="bold">N</text>
+
+                                <!-- ROMBO EJECUTA, ACCIÓN Y SUBCLASES -->
+                                <polygon points="425,338 465,365 425,392 385,365" fill="#ffe082" stroke="#e65100" stroke-width="2"/>
+                                <text x="425" y="369" font-size="10" font-weight="bold" text-anchor="middle">Ejecuta</text>
+                                <text x="530" y="355" font-size="11" font-weight="bold">N</text>
+                                <text x="312" y="355" font-size="11" font-weight="bold">1</text>
+
+                                <line x1="215" y1="340" x2="195" y2="305" stroke="#333" stroke-width="1.5"/>
+                                <line x1="265" y1="340" x2="285" y2="305" stroke="#333" stroke-width="1.5"/>
+                                <rect x="180" y="340" width="120" height="50" fill="#1a237e" stroke="#111" stroke-width="2"/>
+                                <text x="240" y="370" fill="#fff" font-weight="bold" font-size="13" text-anchor="middle">ACCIÓN</text>
+                                <ellipse cx="190" cy="295" rx="35" ry="12" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="190" y="299" font-size="9" font-weight="bold" text-decoration="underline" text-anchor="middle">Cód_Acc</text>
+                                <ellipse cx="285" cy="295" rx="35" ry="12" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="285" y="299" font-size="9" text-anchor="middle">Descrip.</text>
+
+                                <polygon points="240,430 268,472 212,472" fill="#ffd54f" stroke="#111" stroke-width="2"/>
+                                <text x="240" y="463" font-size="10" font-weight="bold" text-anchor="middle">ISA</text>
+                                <circle cx="240" cy="479" r="8" fill="#fff9c4" stroke="#111" stroke-width="1.5"/>
+                                <text x="240" y="483" font-size="10" font-weight="bold" text-anchor="middle">d</text>
+
+                                <line x1="145" y1="560" x2="145" y2="590" stroke="#333" stroke-width="1.5"/>
+                                <rect x="90" y="515" width="110" height="45" fill="#bbdefb" stroke="#111" stroke-width="2"/>
+                                <text x="145" y="542" font-weight="bold" font-size="11" text-anchor="middle">DE_FUNCIÓN</text>
+                                <ellipse cx="145" cy="600" rx="44" ry="12" fill="#fff" stroke="#333" stroke-width="1.2"/>
+                                <text x="145" y="604" font-size="9" text-anchor="middle">Nom_Función</text>
+
+                                <rect x="280" y="515" width="110" height="45" fill="#bbdefb" stroke="#111" stroke-width="2"/>
+                                <text x="335" y="542" font-weight="bold" font-size="11" text-anchor="middle">DE_LLAMADA</text>
+
+                                <!-- ROMBO INVOCA -->
+                                <polygon points="950,628 990,653 950,678 910,653" fill="#ffe082" stroke="#e65100" stroke-width="2"/>
+                                <text x="950" y="657" font-size="10" font-weight="bold" text-anchor="middle">Invoca</text>
+                                <text x="350" y="642" font-size="11" font-weight="bold">N</text>
+                                <text x="1030" y="410" font-size="11" font-weight="bold">1</text>
+                            </svg>
+                        </div>
+
+                    </div>
+                </details>
             </div>
             
         </div>
